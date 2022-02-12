@@ -12,8 +12,9 @@ objpoints = []
 imgpoints = []
 
 
-objp = np.zeros((1, height*width, 3), np.float32)
-objp[0, :, :2] = np.mgrid[0:width, 0:height].T.reshape(-1, 2)
+objp = np.zeros((height*width, 3), np.float32)
+objp[:, :2] = np.mgrid[0:width, 0:height].T.reshape(-1, 2)
+
 
 # ORB --> THE DETECTOR WHOSE ROLE IS FINDING FEATURES (we have to think as feature distinctive parts of images -->
 # out aim is to build a DESCRIPTOR, which is the one that convert features in computer language
@@ -39,16 +40,32 @@ matches = bf.knnMatch(des1, des2, k=2) # k=2 implies using m, n
 
 good = []
 
+print("eskere")
+print(np.asarray([kp2[0].pt]))
+print("eskere")
+
 for m, n in matches:
     if m.distance < 0.75*n.distance:  # only in this condition we consider the matching good
         good.append([m])
         #imgpoints.append([des2[mat.trainIdx].pt for mat in matches])
-        imgpoints.append(des2[m.queryIdx])
+        #imgpoints.append(np.array(kp2[m.queryIdx].pt, np.float32))
+        imgpoints.append(np.asarray([kp2[m.queryIdx].pt]))
+        print(des2[m.queryIdx])
+
         #print([mat.trainIdx for mat in matches])
         #print(n.distance)
         objpoints.append(objp)
 
-print(len(objpoints))
+imageP2 = []
+for i in imgpoints:
+    imageP2.append(i)
+
+print(np.array(imageP2))
+
+# print("____________________")
+# print(kp2[0].pt)
+#
+# print(len(objpoints))
 img3 = cv2.drawMatchesKnn(img1, kp1, img2, kp2, good, None, flags=2)
 
 cv2.imshow("kp1", imgKp1)
@@ -63,7 +80,10 @@ cv2.waitKey(0)
 
 #______________________________________________________________________________________________________________________
 
-
+objpoints = np.array(objpoints)
+print(objpoints)
+print("________________________")
+print(imgpoints)
 
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, img2.shape[::-1], None, None)
 
